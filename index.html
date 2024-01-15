@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Library Database Interface</title>
+    <style>
+        body {
+            background-image: url(Picsart_24-01-13_17-23-16-688.jpg);
+            background-repeat: no-repeat;
+            background-size: cover;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        h1 {
+            font-family: 'Arial Black', Arial, sans-serif;
+            padding-left: 300px;
+            color: #3f2626;
+            font-size: 50px;
+            font-weight: bold;
+            text-shadow: 4px 4px 6px rgba(0, 0, 0, 0.5);
+            transform: skew(-10deg, 0);
+        }
+
+        h2 {
+            margin-top: 0;
+            padding-left: 30px;
+            color: #080606;
+            font-size: 35px;
+            font-weight: bold;
+            text-shadow: 4px 4px 6px rgba(0, 0, 0, 0.5);
+            transform: skew(-10deg, 0);
+        }
+
+        h3 {
+            margin-top: 0;
+            padding-left: 30px;
+            color: #080606;
+            font-size: 20px;
+            font-weight: bold;
+            text-shadow: 4px 4px 6px rgba(0, 0, 0, 0.5);
+            transform: skew(-10deg, 0);
+        }
+
+        table {
+            margin-top: 0;
+            padding-left: 30px;
+        }
+
+        button {
+            margin-top: 0;
+            margin-left: auto;
+            margin-left: 20px;
+            padding: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            background-color: #3498db;
+            color: #ffffff;
+            border: none;
+        }
+
+        button:hover {
+            background-color: #ff6347;
+        }
+
+        p {
+            margin-top: 0;
+            padding-left: 30px;
+        }
+
+       
+        .box-table {
+            display: flex;
+            flex-direction: column;
+            margin-top: 10px;
+            border: 1px solid #040303;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        
+        .box-row {
+            display: flex;
+            border-bottom: 1px solid #000000;
+        }
+        
+        .box-cell {
+            flex: 1;
+            padding: 8px;
+            text-align: center;
+        }
+        
+        .box-column {
+            display: flex;
+            border-bottom: 1px solid #000000;
+        }
+        
+        .box-line {
+            width: 1px;
+            background-color: #000000;
+            margin: 0 4px;
+        }
+        
+        .header {
+            font-weight: bold;
+            color: #000000;
+        }
+        
+        
+        
+        
+    </style>
+</head>
+
+<body>
+    <h1> BookHouse </h1>
+
+    <h2>Library Database Interface</h2>
+    <br>
+
+    <h3>1. Retrieve details of all books in the library</h3>
+    <button onclick="retrieveAllBooks()">Retrieve All Books</button>
+    <table id="result1"></table>
+    <br>
+
+    <h3>2. Particulars of borrowers with more than 3 books (Jan 2017 to Jun 2017)</h3>
+    <button onclick="retrieveBorrowers()">Retrieve Borrowers</button>
+    <table id="result2"></table>
+    <br>
+
+    <h3>3. Delete a book by Book ID</h3>
+    <label for="bookIdToDelete">Book ID to Delete:</label>
+    <input type="text" id="bookIdToDelete" placeholder="Enter Book ID">
+    <button onclick="deleteBook()">Delete Book</button>
+    <br>
+
+    <h3>4. Partition the BOOK table based on the year of publication</h3>
+    <button onclick="partitionBooks()">Partition Books</button>
+    <table id="result4"></table>
+    <br>
+
+    <h3>5. View of available books and their copies</h3>
+    <button onclick="retrieveAvailableBooks()">Retrieve Available Books</button>
+    <table id="result5"></table>
+
+    <br>
+    <footer>
+        <p>&copy; 2024 My Website</p>
+    </footer>
+ <script>
+    const publishers = [
+    { NAME: 'MCGRAW-HILL', PHONE: 9989076587, ADDRESS: 'BANGALORE' },
+    { NAME: 'PEARSON', PHONE: 9889076565, ADDRESS: 'NEWDELHI' },
+    { NAME: 'RANDOM HOUSE', PHONE: 7455679345, ADDRESS: 'HYDRABAD' },
+    { NAME: 'HACHETTE LIVRE', PHONE: 8970862340, ADDRESS: 'CHENAI' },
+    { NAME: 'GRUPO PLANETA', PHONE: 7756120238, ADDRESS: 'BANGALORE' },
+];
+
+const books = [
+    { BOOK_ID: 1, TITLE: 'DBMS', PUB_YEAR: 'JAN-2017', PUBLISHER_NAME: 'MCGRAW-HILL' },
+    { BOOK_ID: 2, TITLE: 'ADBMS', PUB_YEAR: 'JUN-2016', PUBLISHER_NAME: 'MCGRAW-HILL' },
+    { BOOK_ID: 3, TITLE: 'CN', PUB_YEAR: 'SEP-2016', PUBLISHER_NAME: 'PEARSON' },
+    { BOOK_ID: 4, TITLE: 'CG', PUB_YEAR: 'SEP-2015', PUBLISHER_NAME: 'GRUPO PLANETA' },
+    { BOOK_ID: 5, TITLE: 'OS', PUB_YEAR: 'MAY-2016', PUBLISHER_NAME: 'PEARSON' },
+];
+
+const bookAuthors = [
+    { AUTHOR_NAME: 'NAVATHE', BOOK_ID: 1 },
+    { AUTHOR_NAME: 'NAVATHE', BOOK_ID: 2 },
+    { AUTHOR_NAME: 'TANENBAUM', BOOK_ID: 3 },
+    { AUTHOR_NAME: 'EDWARD ANGEL', BOOK_ID: 4 },
+    { AUTHOR_NAME: 'GALVIN', BOOK_ID: 5 },
+];
+
+const libraryBranches = [
+    { BRANCH_ID: 10, BRANCH_NAME: 'RR NAGAR', ADDRESS: 'BANGALORE' },
+    { BRANCH_ID: 11, BRANCH_NAME: 'DEPT OF CS&E,ATRIA I T', ADDRESS: 'BANGALORE' },
+    { BRANCH_ID: 12, BRANCH_NAME: 'RAJAJI NAGAR', ADDRESS: 'BANGALORE' },
+    { BRANCH_ID: 13, BRANCH_NAME: 'NITTE', ADDRESS: 'MANGALORE' },
+    { BRANCH_ID: 14, BRANCH_NAME: 'MANIPAL', ADDRESS: 'UDUPI' },
+];
+
+const bookCopies = [
+    { NO_OF_COPIES: 10, BOOK_ID: 1, BRANCH_ID: 10 },
+    { NO_OF_COPIES: 5, BOOK_ID: 1, BRANCH_ID: 11 },
+    { NO_OF_COPIES: 2, BOOK_ID: 2, BRANCH_ID: 12 },
+    { NO_OF_COPIES: 5, BOOK_ID: 2, BRANCH_ID: 13 },
+    { NO_OF_COPIES: 7, BOOK_ID: 3, BRANCH_ID: 14 },
+    { NO_OF_COPIES: 1, BOOK_ID: 5, BRANCH_ID: 10 },
+    { NO_OF_COPIES: 3, BOOK_ID: 4, BRANCH_ID: 11 },
+];
+
+const cards = [
+    { CARD_NO: 100 },
+    { CARD_NO: 101 },
+    { CARD_NO: 102 },
+    { CARD_NO: 103 },
+    { CARD_NO: 104 },
+];
+
+const bookLending = [
+    { DATE_OUT: '01-JAN-17', DUE_DATE: '01-JUN-17', BOOK_ID: 1, BRANCH_ID: 10, CARD_NO: 101 },
+    { DATE_OUT: '11-JAN-17', DUE_DATE: '11-MAR-17', BOOK_ID: 3, BRANCH_ID: 14, CARD_NO: 101 },
+    { DATE_OUT: '21-FEB-17', DUE_DATE: '21-APR-17', BOOK_ID: 2, BRANCH_ID: 13, CARD_NO: 101 },
+    { DATE_OUT: '15-MAR-17', DUE_DATE: '15-JUL-17', BOOK_ID: 4, BRANCH_ID: 11, CARD_NO: 101 },
+    { DATE_OUT: '12-APR-17', DUE_DATE: '12-MAY-17', BOOK_ID: 1, BRANCH_ID: 11, CARD_NO: 104 },
+];
+    
+   // Function to retrieve all books and display in a box table
+function retrieveAllBooks() {
+    const result1 = document.getElementById("result1");
+
+    // Check if the content is already visible
+    if (result1.classList.contains("visible")) {
+        // Hide the content
+        result1.innerHTML = '';
+        result1.classList.remove("visible");
+    } else {
+        // Create a box table
+        const boxTable = document.createElement("div");
+        boxTable.classList.add("box-table");
+
+        // Create table headers
+        const tableHeaders = "<div class='box-row'><div class='box-cell header'>Book ID</div><div class='box-cell header'>Title</div><div class='box-cell header'>Publication Year</div><div class='box-cell header'>Publisher Name</div></div>";
+        boxTable.innerHTML += tableHeaders;
+
+        // Populate the box table with book data
+        books.forEach(book => {
+            const row = document.createElement("div");
+            row.classList.add("box-row");
+            row.innerHTML = `<div class='box-cell'>${book.BOOK_ID}</div><div class='box-cell'>${book.TITLE}</div><div class='box-cell'>${book.PUB_YEAR}</div><div class='box-cell'>${book.PUBLISHER_NAME}</div>`;
+            boxTable.appendChild(row);
+        });
+
+        // Append the box table to the result1 element
+        result1.appendChild(boxTable);
+
+        // Add the "visible" class to mark the content as visible
+        result1.classList.add("visible");
+    }
+}
+
+// Function to retrieve borrowers with more than 3 books (Jan 2017 to Jun 2017)
+function retrieveBorrowers() {
+    const result2 = document.getElementById("result2");
+
+    // Check if the content is already visible
+    if (result2.classList.contains("visible")) {
+        // Hide the content
+        result2.innerHTML = '';
+        result2.classList.remove("visible");
+    } else {
+        // Create table headers
+        const tableHeaders = "<tr><th>CARD_NO</th></tr>";
+        result2.innerHTML += tableHeaders;
+
+        // Filter borrowers with more than 3 books between Jan 2017 and Jun 2017
+        const borrowersWithMoreThan3Books = [];
+
+        // Loop through book lending data
+        for (const lending of bookLending) {
+            const lendingDate = new Date(lending.DATE_OUT);
+
+            // Check if the lending date is between Jan 2017 and Jun 2017
+            if (lendingDate >= new Date('01-JAN-17') && lendingDate <= new Date('30-JUN-17')) {
+                // Increment book count for the card number
+                const cardNo = lending.CARD_NO;
+                borrowersWithMoreThan3Books[cardNo] = (borrowersWithMoreThan3Books[cardNo] || 0) + 1;
+            }
+        }
+
+        // Populate the table with borrower data
+        Object.keys(borrowersWithMoreThan3Books).forEach(cardNo => {
+            if (borrowersWithMoreThan3Books[cardNo] > 3) {
+                result2.innerHTML += `<tr><td>${cardNo}</td></tr>`;
+            }
+        });
+
+        // Add the "visible" class to mark the content as visible
+        result2.classList.add("visible");
+    }
+}
+
+// Function to delete a book by Book ID
+function deleteBook() {
+    const bookIdToDelete = document.getElementById("bookIdToDelete").value;
+
+    // Find the index of the book with the specified Book ID
+    const bookIndex = books.findIndex(book => book.BOOK_ID === parseInt(bookIdToDelete));
+
+    if (bookIndex !== -1) {
+        // Remove the book from the 'books' array
+        books.splice(bookIndex, 1);
+
+        // Update the "Retrieve details of all books in the library" query
+        retrieveAllBooks();
+    }
+}
+
+// Function to partition the BOOK table based on the year of publication and display in a box table
+function partitionBooks() {
+    const result4 = document.getElementById("result4");
+
+    // Check if the content is already visible
+    if (result4.classList.contains("visible")) {
+        // Hide the content
+        result4.innerHTML = '';
+        result4.classList.remove("visible");
+    } else {
+        // Create a box table
+        const boxTable = document.createElement("div");
+        boxTable.classList.add("box-table");
+
+        // Create table headers
+        const tableHeaders = "<div class='box-row'><div class='box-cell header'>Publication Year</div><div class='box-cell header'>Book ID</div><div class='box-cell header'>Title</div><div class='box-cell header'>Publisher Name</div></div>";
+        boxTable.innerHTML += tableHeaders;
+
+        // Sort books by PUB_YEAR
+        const sortedBooks = books.sort((a, b) => a.PUB_YEAR.localeCompare(b.PUB_YEAR));
+
+        // Populate the box table with sorted book data
+        sortedBooks.forEach(book => {
+            const row = document.createElement("div");
+            row.classList.add("box-row");
+            row.innerHTML = `<div class='box-cell'>${book.PUB_YEAR}</div><div class='box-cell'>${book.BOOK_ID}</div><div class='box-cell'>${book.TITLE}</div><div class='box-cell'>${book.PUBLISHER_NAME}</div>`;
+            boxTable.appendChild(row);
+        });
+
+        // Append the box table to the result4 element
+        result4.appendChild(boxTable);
+
+        // Add the "visible" class to mark the content as visible
+        result4.classList.add("visible");
+    }
+}
+
+// Function to retrieve available books and their copies and display in a box table
+function retrieveAvailableBooks() {
+    const result5 = document.getElementById("result5");
+
+    // Check if the content is already visible
+    if (result5.classList.contains("visible")) {
+        // Hide the content
+        result5.innerHTML = '';
+        result5.classList.remove("visible");
+    } else {
+        // Create a box table
+        const boxTable = document.createElement("div");
+        boxTable.classList.add("box-table");
+
+        // Create table headers
+        const tableHeaders = "<div class='box-row'><div class='box-cell header'>Book ID</div><div class='box-cell header'>Title</div><div class='box-cell header'>Available Copies</div></div>";
+        boxTable.innerHTML += tableHeaders;
+
+        // Loop through books and book copies to calculate available copies for each book
+        books.forEach(book => {
+            const bookId = book.BOOK_ID;
+            const title = book.TITLE;
+
+            // Find total number of copies for the book
+            const totalCopies = bookCopies
+                .filter(copy => copy.BOOK_ID === bookId)
+                .reduce((sum, copy) => sum + copy.NO_OF_COPIES, 0);
+
+            // Find the number of copies currently borrowed
+            const borrowedCopies = bookLending
+                .filter(lending => lending.BOOK_ID === bookId)
+                .reduce((sum, lending) => sum + 1, 0);
+
+            // Calculate available copies
+            const availableCopies = totalCopies - borrowedCopies;
+
+            // Display the information in the box table
+            const row = document.createElement("div");
+            row.classList.add("box-row");
+            row.innerHTML = `<div class='box-cell'>${bookId}</div><div class='box-cell'>${title}</div><div class='box-cell'>${availableCopies}</div>`;
+            boxTable.appendChild(row);
+        });
+
+        // Append the box table to the result5 element
+        result5.appendChild(boxTable);
+
+        // Add the "visible" class to mark the content as visible
+        result5.classList.add("visible");
+    }
+}
+
+
+        
+    </script>
+
+</body>
+
+</html>
